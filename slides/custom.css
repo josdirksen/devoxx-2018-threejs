@@ -1,0 +1,73 @@
+h2.dark {
+    color: black
+}
+
+h2.dark strong {
+    color: #b34400;
+}
+
+.reveal h1 {
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.reveal h2 {
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.reveal h3 {
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+h1 strong {
+    color: #ff6400;
+}
+
+h2 strong {
+    color: #ff6400;
+}
+
+h3 strong {
+    color: #ff6400;
+}
+
+h4 strong {
+    color: #ff6400;
+}
+
+li strong {
+    color: #ff6400;
+}
+
+strong  {
+    color: #ff6400;
+}
+
+.reveal blockquote {
+    width: 100%;
+}
+
+.reveal blockquote strong {
+    color: #ff6400;
+}
+
+li code {
+    color: gray;
+}
+
+.left {
+    left:-8.33%;
+    text-align: left;
+    float: left;
+    width:50%;
+    z-index:-10;
+}
+
+.right {
+    left:31.25%;
+    top: 75px;
+    float: right;
+    text-align: right;
+    z-index:-10;
+    width:50%;
+}
+
