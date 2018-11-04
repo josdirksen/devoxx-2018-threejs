@@ -1,20 +1,12 @@
-## **Three.js** : When **2D** in your browser just isn't enough
-
-<!-- <iframe data-src="http://hakim.se" width="100%" height="100%"></iframe> -->
-<!-- TODO: Add a nice image here or use a background image. Maybe of a rising earth. -->
+## **Three.js**, Easy **3D** in your browser for when **two dimensions** just aren't **enough!**
 
 
-## What is Three.js
+## What is **Three.js**
 
 > The aim of the project is to create an easy to use, lightweight, **3D** library. The library provides Canvas 2D, SVG, 
 > CSS3D and **WebGL** renderers. - [github.com/mrdoob/three.js]()
 
-~ This presentation focusses on the **WebGL** part ~
-
-
-## Goal of this presentation
-
-> Learn the basic principles, patterns and concepts behind Three.js. 
+*~ This presentation focusses on the **WebGL** part ~*
 
 
 ## More information
