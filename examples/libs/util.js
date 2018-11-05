@@ -606,7 +606,7 @@ function loadGopher(material) {
   var loader = new THREE.OBJLoader();
   var mesh = null;
   var p = new Promise(function(resolve) {
-      loader.load('../assets/gopher.obj', function (loadedMesh) {
+      loader.load('../assets/gopher3.obj', function (loadedMesh) {
           // this is a group of meshes, so iterate until we reach a THREE.Mesh
           mesh = loadedMesh;
           if (material) {
