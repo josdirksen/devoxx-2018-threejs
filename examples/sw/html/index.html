@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Starwars: R2D2 in Three.js</title>
+    <script src="../../libs/three/three.js"></script>
+    <script src="../libs/OBJLoader.js"></script>
+    <script src="../libs/dat.gui.js"></script>
+    <script src="../libs/OrbitControls.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-19067049-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+
+    </script>
+</head>
+<body>
+
+<div id="WebGL-output">
+</div>
+
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+
+    // once everything is loaded, we run our Three.js stuff.
+    function init() {
+
+        // create a scene, that will hold all our elements such as objects, cameras and lights.
+        var textureLoader = new THREE.TextureLoader();
+        var scene = new THREE.Scene();
+        scene.background = textureLoader.load('back.png');
+
+        // create a camera, which defines where we're looking at.
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // create a render and set the size
+        var renderer = new THREE.WebGLRenderer({antialias: true});
+
+        renderer.setClearColor(new THREE.Color(0x000000));
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+
+        var controls = new THREE.OrbitControls( camera, renderer.domElement );
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.25;
+        controls.enableZoom = false;
+
+        // position and point the camera to the center of the scene
+        camera.position.x = 0;
+        camera.position.y = 0;
+        camera.position.z = 40;
+
+        // add some lights
+        var spotLight1 = new THREE.SpotLight(0xffffff, 0.3, 0, Math.PI/4);
+        spotLight1.position.set(-20, 20, 5);
+        scene.add(spotLight1);
+
+        var spotLight2 = new THREE.SpotLight(0xffffff, 0.6, 0, Math.PI/4);
+        spotLight2.position.set(-5, 30, 30);
+        spotLight2.castShadow = true;
+        spotLight2.shadow = new THREE.LightShadow( new THREE.PerspectiveCamera( 30, 1, 10, 50 ) );
+
+        scene.add(spotLight2);
+
+        var spotLight3 = new THREE.SpotLight(0xffffff, 0.3, 0, Math.Pi/4);
+        spotLight3.position.set(20, 20, -10);
+        scene.add(spotLight3);
+
+
+        // add the output of the renderer to the html element
+        document.getElementById("WebGL-output").appendChild(renderer.domElement);
+        render();
+
+        // load the model
+        var obj;
+        var head;
+        var frontP;
+
+        loadModel();
+        function loadModel() {
+            var textLoader = new THREE.TextureLoader();
+
+            var diffuseTexture = textLoader.load("../resources/R2D2_Diffuse-Reflection-Combined-small.png");
+            var bumpTexture = textLoader.load("../resources/R2D2_Normal-small.png");
+            var emissiveTexture = textLoader.load("../resources/R2D2_Illumination-small.png");
+            var specularTexture = textLoader.load("../resources/R2D2_Specular-small.png");
+
+            var loader = new THREE.OBJLoader();
+            loader.load("../resources/R2D2_Standing.obj", function(model) {
+                model.children.forEach(function(child) {
+                    var material = child.material;
+
+                    // basic texture
+                    material.map = diffuseTexture;
+
+                    // bumps
+                    material.bumpMap = bumpTexture;
+                    material.bumpScale = 0.3;
+
+                    // glow
+                    material.emissive = new THREE.Color(0xffffff);
+                    material.emissiveMap = emissiveTexture;
+
+                    // specular
+                    material.specularMap = specularTexture;
+
+                    child.receiveShadow = true;
+                    child.castShadow = true;
+
+                    if (child.name === "Head") head = child;
+                    if (child.name === "Front_Projector") frontP = child;
+                });
+
+                model.scale.x = 0.15;
+                model.scale.y = 0.15;
+                model.scale.z = 0.15;
+
+                model.position.y = -10;
+                obj = model;
+                scene.add(obj);
+            })
+        }
+
+        var rotMax = 0.5 * Math.PI;
+        var rotMin = -0.5 * Math.PI;
+        var direction = 1;
+
+        function render() {
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+
+            if (head) {
+                var rotationY = (0.01 * direction);
+                head.rotation.y += rotationY;
+                frontP.rotation.y += rotationY;
+
+                if (head.rotation.y > rotMax) direction = -1;
+                if (head.rotation.y < rotMin) direction = 1;
+
+            }
+        }
+    }
+
+    window.onload = init;
+    </script>
+
+</body>
+</html>

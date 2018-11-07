@@ -13,6 +13,21 @@
 - And some others...
 
 
+## Easy to **use**...
+
+```
+var basicMaterial = new THREE.MeshStandardMaterial({...});
+var geom = new THREE.MeshSphereGeometry(3, 30, 30);
+var mesh1 = new THREE.Mesh(geom, basicMaterial);
+
+var normalMaterial = new THREE.MeshNormalMaterial();
+var mesh2 = new THREE.Mesh(geom, normalMaterial);
+
+```
+
+*~Three.js converts this to shaders~*
+
+
 ## What does it look like
 
 ![WebGL 101](./images/gopher.png) <!-- .element height="400" -->
@@ -51,12 +66,37 @@ Interesting ones:
 *[~Normal Map Example~](../examples/normalmap)*
 
 
-## **UV*-coordinates
+## Configuring **materials**
 
-Image of UV mapping
+```
+var textureLoader = new THREE.TextureLoader();
 
-Should I show an example
+var basicMaterial = new THREE.MeshStandardMaterial();
+basicMaterial.map = textureLoader.load('textures/wood.png');
+basicMaterial.normalMap = textureLoader
+    .load('textures/woodNormal.png');
 
-TODO:
-  - Explain UVMapping.
-  - Show some code how to load this, instead of just showing the results.
+var geom = new THREE.MeshSphereGeometry(3, 30, 30);
+var mesh1 = new THREE.Mesh(geom, basicMaterial);
+```
+
+*~ asynchronously loads the materials ~*
+
+
+## **Reflections** in THREE.js
+
+- Reflections are expensive
+- Often faked through an **environment map**
+
+> In computer graphics, environment mapping, or reflection mapping, is an 
+> efficient image-based lighting technique for approximating the 
+> appearance of a reflective surface by means of a **precomputed texture image**. 
+> The **texture** is used to store the image of the **distant environment** surrounding 
+> the rendered object.
+
+
+## An example **environment map**
+
+![Normal map](./images/Env.jpg) <!-- .element height="400" -->
+
+~ *a 360º image* ~

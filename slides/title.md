@@ -9,6 +9,16 @@
 *~ This presentation focusses on the **WebGL** part ~*
 
 
+## **Goal** of this presentation
+
+- Explain the concepts behind **three.js**
+- Not focus on the whole **API**
+- Explain the concepts behind 3D modelling, so you...
+  - Can create 3D **visualizations** yourself,
+  - provide web based **VR** applications
+  - and add **AR** capabilities to web sites.
+
+
 ## More information
 
 #### More about three.js  <!-- .element: style="text-align: left" -->
