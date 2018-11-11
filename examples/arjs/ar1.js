@@ -17,10 +17,18 @@ function init() {
   scene.add(camera);
 
   // Ar.Js initialization stuff
-  var arToolkitSource = new THREEx.ArToolkitSource({ sourceType : 'webcam' })
+  var arToolkitSource = new THREEx.ArToolkitSource({ 
+      sourceType : 'webcam',
+      sourceWidth: 320,
+	    sourceHeight: 240,
+	    // resolution displayed for the source 
+	    displayWidth: 320,
+	    displayHeight: 240 })
   arToolkitSource.init(function onReady(){
 		onResize()
   })
+
+  console.log(arToolkitSource);
 	var arToolkitContext = new THREEx.ArToolkitContext({
 		cameraParametersUrl: './camera_para.dat',
 		detectionMode: 'mono',
@@ -36,7 +44,7 @@ function init() {
   })
 
 	// as we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
-  scene.visible = false
+  scene.visible = false  
 
   var light = new THREE.DirectionalLight();
   light.position.set(200, 300, 300);
