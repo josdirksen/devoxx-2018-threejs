@@ -1,0 +1,128 @@
+
+  <html>
+      <head>
+        <title>Hit test example</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <style>
+          body, html {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            -webkit-user-select: none;
+            user-select: none;
+          }
+          #target {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+          }
+          .common-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+          }
+        </style>
+        <script src="../libs/three/three.js"></script>
+        <script src="./webxr-polyfill.js"></script>
+        <script src="../libs/three/GLTFLoader.js"></script>
+        <script src="common.js"></script>
+      </head>
+      <body>
+        <div id="target" />
+        <script>
+            class ARAnchorExample extends XRExampleBase {
+
+              constructor(domElement){
+                super(domElement, false)
+                this.anchorsToAdd = [] // { node, x, y, z }
+                this.addObjectButton = document.createElement('button')
+                this.addObjectButton.setAttribute('class', 'add-object-button')
+                this.addObjectButton.innerText = 'Add Box'
+                this.el.appendChild(this.addObjectButton)
+                this.addObjectButton.addEventListener('click', ev => {
+                  this.addAnchoredModel(this.createSceneGraphNode(), 0, 0, -0.75)
+                })
+                this.meshes = [];
+                this.clock = new THREE.Clock();
+              }
+
+              // Called during construction
+              initializeScene(){
+                this.scene.add(new THREE.AmbientLight('#FFF', 0.2))
+                let directionalLight = new THREE.DirectionalLight('#FFF', 0.6)
+                directionalLight.position.set(0, 10, 0)
+                this.scene.add(directionalLight)
+
+                // add a flamingo
+                var self = this;
+                this.mixer = undefined;
+                this.mesh = undefined;
+                var loader = new THREE.GLTFLoader();
+                loader.load( 'flamingo.gltf', function ( gltf ) {
+                  self.mesh = gltf.scene.children[ 0 ];
+                  self.mesh.scale.set(0.003, 0.003, 0.003);
+                  self.mesh.rotation.y += 0.5*Math.PI;
+                  self.animation = gltf.animations[ 0 ];
+                });
+              }
+
+              createSceneGraphNode(){
+                let g = new THREE.Group();
+                var cloned = this.mesh.clone();
+                g.add(cloned);
+
+                cloned.mixer = new THREE.AnimationMixer(cloned);
+                cloned.mixer.clipAction(this.animation).setDuration( 2 ).play();
+                this.meshes.push(g);
+
+                return g;
+              }
+
+              doRender() {
+                var delta = this.clock.getDelta();
+                this.meshes.forEach(element => {
+                  element.children[0].mixer.update(delta);
+                });
+                super.doRender();
+              }
+
+              /*
+                addAnchoredModel creates an anchor at (x,y,z) relative to the camera and positions the sceneGraphNode on the anchor from that point on
+              */
+              addAnchoredModel(sceneGraphNode, x, y, z){
+                // Save this info for use during the next render frame
+                this.anchorsToAdd.push({
+                  node: sceneGraphNode,
+                  x: x, y: y, z: z
+                })
+              }
+              // Called once per frame
+              updateScene(frame){
+                const headCoordinateSystem = frame.getCoordinateSystem(XRCoordinateSystem.HEAD_MODEL)
+                // Create anchors and start tracking them
+                for(let anchorToAdd of this.anchorsToAdd){
+                  // Create the anchor and tell the base class to update the node with its position
+                  const anchorUID = frame.addAnchor(headCoordinateSystem, [anchorToAdd.x, anchorToAdd.y, anchorToAdd.z])
+                  this.addAnchoredNode(new XRAnchorOffset(anchorUID), anchorToAdd.node)
+                }
+                this.anchorsToAdd = []
+              }
+            }
+            window.addEventListener('DOMContentLoaded', () => {
+              setTimeout(() => {
+                try {
+                  window.pageApp = new ARAnchorExample(document.getElementById('target'))
+                } catch(e) {
+                  console.error('page error', e)
+                }
+              }, 1000)
+            })
+          </script>
+      </body>
+    </html>
