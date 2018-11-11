@@ -17,24 +17,27 @@ function init() {
   scene.add(camera);
 
   // Ar.Js initialization stuff
-  var arToolkitSource = new THREEx.ArToolkitSource({ sourceType : 'webcam'})
-  arToolkitSource.init(function onReady(){onResize()})
+  var arToolkitSource = new THREEx.ArToolkitSource({ sourceType : 'webcam' })
+  arToolkitSource.init(function onReady(){
+		onResize()
+  })
 	var arToolkitContext = new THREEx.ArToolkitContext({
-    cameraParametersUrl: './camera_para.dat',
+		cameraParametersUrl: './camera_para.dat',
 		detectionMode: 'mono',
 	})
 	arToolkitContext.init(function onCompleted(){
 		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
   })
   
-  // which markers do we use?
   var markerControls = new THREEx.ArMarkerControls(arToolkitContext, camera, {
-		type : 'pattern', patternUrl : './patt.hiro', changeMatrixMode: 'cameraTransformMatrix'
+		type : 'pattern',
+		patternUrl : './patt.hiro',
+		changeMatrixMode: 'cameraTransformMatrix'
   })
 
-  scene.visible = false  
+	// as we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
+  scene.visible = false
 
-	// And the normal stuff
   var light = new THREE.DirectionalLight();
   light.position.set(200, 300, 300);
   scene.add(light);
@@ -78,5 +81,3 @@ function init() {
   }
 
 }
-
-
