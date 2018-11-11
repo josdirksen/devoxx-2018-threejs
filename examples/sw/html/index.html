@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Starwars: R2D2 in Three.js</title>
     <script src="../../libs/three/three.js"></script>
-    <script src="../libs/OBJLoader.js"></script>
+    <script src="../../libs/three/OBJLoader.js"></script>
     <script src="../libs/dat.gui.js"></script>
     <script src="../libs/OrbitControls.js"></script>
     <style>
@@ -101,35 +101,41 @@
 
             var loader = new THREE.OBJLoader();
             loader.load("../resources/R2D2_Standing.obj", function(model) {
-                model.children.forEach(function(child) {
-                    var material = child.material;
 
-                    // basic texture
+                function updateMaterial(material) { 
                     material.map = diffuseTexture;
-
-                    // bumps
                     material.bumpMap = bumpTexture;
                     material.bumpScale = 0.3;
-
-                    // glow
                     material.emissive = new THREE.Color(0xffffff);
                     material.emissiveMap = emissiveTexture;
-
-                    // specular
                     material.specularMap = specularTexture;
+                }
 
-                    child.receiveShadow = true;
-                    child.castShadow = true;
+                function updateMaterials(object) {
+                    if (object.children && !object instanceof THREE.Mesh) {
+                        object.children.forEach(updateMaterials)
+                    } else {
+                        var material = object.material;
+                        if (Array.isArray(material)) {
+                            material.forEach(updateMaterial)
+                        } else {
+                            updateMaterial(material);
+                        }
+                        object.receiveShadow = true;
+                        object.castShadow = true;
+                        if (object.name === "Head") head = object;
+                        if (object.name === "Front_Projector") frontP = object;
+                    }
+                }
 
-                    if (child.name === "Head") head = child;
-                    if (child.name === "Front_Projector") frontP = child;
-                });
+                console.log(model);
+                model.children.forEach(updateMaterials);
 
                 model.scale.x = 0.15;
                 model.scale.y = 0.15;
                 model.scale.z = 0.15;
-
                 model.position.y = -10;
+                
                 obj = model;
                 scene.add(obj);
             })

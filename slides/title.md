@@ -1,6 +1,3 @@
-## **Three.js**, Easy **3D** in your browser for when **two dimensions** just aren't **enough!**
-
-
 ## What is **Three.js**
 
 > The aim of the project is to create an easy to use, lightweight, **3D** library. The library provides Canvas 2D, SVG, 

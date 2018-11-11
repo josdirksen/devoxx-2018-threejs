@@ -1,6 +1,3 @@
-# 3D Modelling **101**
-
-
 ## 3D **Core** concepts
 
 * **Vertex**: point in the 3D world: `(x, y, z)`

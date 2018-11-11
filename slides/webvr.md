@@ -1,6 +1,3 @@
-# WebXR: **VR**
-
-
 ## **VR** part of Web-XR
 
 - Open standard that allows VR in browsers
@@ -68,8 +65,8 @@ document.body.appendChild( WEBVR.createButton( renderer ) );
 ```
 
 
-## Other **demos**
+## **Three.js**: Rollercoaster
 
-- Demo 1
-- Demo 2
-- Demo 3
+![WebGL 101](./images/rollercoaster.png) <!-- .element height="50%" width="70%" -->
+
+[~RollerCoaster~](https://threejs.org/examples/webvr_rollercoaster.html)

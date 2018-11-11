@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<!-- saved from url=(0032)http://localhost:5500/slides/#/6 -->
+<html class=" js no-mobile desktop no-ie chrome chrome70 slides-section gradient rgba opacity textshadow multiplebgs boxshadow borderimage borderradius cssreflections csstransforms csstransitions no-touch retina fontface domloaded w-1440 gt-240 gt-320 gt-480 gt-640 gt-768 gt-800 gt-1024 gt-1280 lt-1680 lt-1920 no-portrait landscape" id="index-page"><script>(function main() {
+    // Create enabled event
+    function fireEnabledEvent() {
+        // If gli exists, then we are already present and shouldn't do anything
+        if (!window.gli) {
+            setTimeout(function () {
+                var enabledEvent = document.createEvent("Event");
+                enabledEvent.initEvent("WebGLEnabledEvent", true, true);
+                document.dispatchEvent(enabledEvent);
+            }, 0);
+        } else {
+            //console.log("WebGL Inspector already embedded on the page - disabling extension");
+        }
+    };
+
+    // Grab the path root from the extension
+    document.addEventListener("WebGLInspectorReadyEvent", function (e) {
+        var pathElement = document.getElementById("__webglpathroot");
+        if (window["gliloader"]) {
+            gliloader.pathRoot = pathElement.innerText;
+        } else {
+            // TODO: more?
+            window.gliCssUrl = pathElement.innerText + "gli.all.css";
+        }
+    }, false);
+
+    // Rewrite getContext to snoop for webgl
+    var originalGetContext = HTMLCanvasElement.prototype.getContext;
+    if (!HTMLCanvasElement.prototype.getContextRaw) {
+        HTMLCanvasElement.prototype.getContextRaw = originalGetContext;
+    }
+    HTMLCanvasElement.prototype.getContext = function () {
+        var ignoreCanvas = this.internalInspectorSurface;
+        if (ignoreCanvas) {
+            return originalGetContext.apply(this, arguments);
+        }
+
+        var result = originalGetContext.apply(this, arguments);
+        if (result == null) {
+            return null;
+        }
+
+        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
+        var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
+        if (requestingWebGL) {
+            // Page is requesting a WebGL context!
+            fireEnabledEvent(this);
+
+            // If we are injected, inspect this context
+            if (window.gli) {
+                if (gli.host.inspectContext) {
+                    // TODO: pull options from extension
+                    result = gli.host.inspectContext(this, result);
+                    // NOTE: execute in a timeout so that if the dom is not yet
+                    // loaded this won't error out.
+                    window.setTimeout(function() {
+                        var hostUI = new gli.host.HostUI(result);
+                        result.hostUI = hostUI; // just so we can access it later for debugging
+                    }, 0);
+                }
+            }
+        }
+
+        return result;
+    };
+})();</script><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>Three.js, Easy 3D in your browser for when two dimensions just aren't enough!</title>
+
+	<link rel="stylesheet" href="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/reveal.css">
+	<link rel="stylesheet" href="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/black.css">
+	<link rel="stylesheet" href="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/custom.css">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script><link rel="stylesheet" type="text/css" href="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/paper.css"><script type="text/javascript" src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/marked.js"></script><script type="text/javascript" src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/markdown.js"></script><script type="text/javascript" src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/notes.js"></script><script type="text/javascript" src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/highlight.js"></script>
+</head>
+
+<body>
+	<div class="reveal slide center has-vertical-slides has-horizontal-slides ready" role="application" data-transition-speed="default" data-background-transition="fade">
+		<div class="slides" style="width: 960px; height: 700px; zoom: 1.0272;">
+			<section data-background-image="./images/bgs/back_1.jpg" data-charset="UTF-8" data-markdown="" data-markdown-parsed="true" hidden="" aria-hidden="true" class="past" style="top: 350px; display: none;"><h1 id="-three-js-easy-3d-when-2d-just-isn-t-enough-"><strong>Three.js</strong>, Easy <strong>3D</strong> when <strong>2D</strong> just isn't <strong>enough!</strong></h1>
+</section>
+			<section data-background-image="./images/bgs/flamingo.png" data-background-position="bottom left" data-background-size="250px" data-charset="UTF-8" hidden="" aria-hidden="true" class="stack past" style="top: 350px; display: none;"><section data-markdown="" data-markdown-parsed="true" style="top: 350px; display: none;"><h2 id="what-is-three-js-">What is <strong>Three.js</strong></h2>
+<blockquote>
+<p>The aim of the project is to create an easy to use, lightweight, <strong>3D</strong> library. The library provides Canvas 2D, SVG, 
+CSS3D and <strong>WebGL</strong> renderers. - <a href="http://localhost:5500/slides/">github.com/mrdoob/three.js</a></p>
+</blockquote>
+<p><em>~ This presentation focusses on the <strong>WebGL</strong> part ~</em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="-goal-of-this-presentation"><strong>Goal</strong> of this presentation</h2>
+<ul>
+<li>Explain the concepts behind <strong>three.js</strong></li>
+<li>Not focus on the whole <strong>API</strong></li>
+<li>Explain the concepts behind 3D modelling, so you...<ul>
+<li>Can create 3D <strong>visualizations</strong> yourself,</li>
+<li>provide web based <strong>VR</strong> applications</li>
+<li>and add <strong>AR</strong> capabilities to web sites.</li>
+</ul>
+</li>
+</ul>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="more-information">More information</h2>
+<h4 id="more-about-three-js-element-style-text-align-left-" style="text-align: left">More about three.js  <!-- --></h4>
+<ul>
+<li>Main site: <a href="http://localhost:5500/slides/">www.threejs.org</a></li>
+<li>My latest book: <a href="http://localhost:5500/slides/">packt.com/josdirksen</a></li>
+<li>Slides: <a href="http://localhost:5500/slides/">github.com/josdirksen/devoxx-threejs</a></li>
+</ul>
+<h4 id="more-about-me-element-style-text-align-left-margin-top-10px-" style="text-align: left; margin-top: 10px">More about me <!-- --></h4>
+<ul>
+<li>Fullstack developer (whatever that might mean)</li>
+<li><strong>Mail</strong>: jos.dirksen@gmail.com</li>
+<li><strong>Twitter</strong>: @josdirksen</li>
+<li><strong>Github</strong>: github.com/josdirksen</li>
+</ul>
+</section></section>			
+			<section data-background-image="./images/bgs/back_2.webp" data-charset="UTF-8" data-markdown="" data-markdown-parsed="true" hidden="" aria-hidden="true" class="past" style="top: 350px; display: none;"><h1 id="3d-modelling-101-">3D Modelling <strong>101</strong></h1>
+</section>			
+			<section data-background-image="./images/bgs/pig.png" data-background-position="bottom left" data-background-size="300px" data-charset="UTF-8" hidden="" aria-hidden="true" class="stack past" style="top: 0px; display: none;"><section data-markdown="" data-markdown-parsed="true" style="top: 116px; display: none;"><h2 id="3d-core-concepts">3D <strong>Core</strong> concepts</h2>
+<ul>
+<li><strong>Vertex</strong>: point in the 3D world: <code>(x, y, z)</code></li>
+<li><strong>Line / edge</strong> : connects two points together</li>
+<li><strong>Face</strong>: three lines connected</li>
+<li><strong>Geometry</strong>: a collection of faces</li>
+<li><strong>Surface</strong>: how should the geometry be rendered</li>
+<li><strong>Mesh / Model</strong>: A geometry and a surface together</li>
+</ul>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="3d-core-concepts">3D <strong>Core</strong> concepts</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/threejs-101.png" alt="Fox 101" height="50%" width="60%"> <!-- --></p>
+<p><a href="http://localhost:5500/examples/core-concepts/concepts.html">~Three.js - 101 Example~</a></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="using-webgl-directly">Using <strong>WebGL</strong> directly</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/webgl-101.png" alt="WebGL 101" height="50%" width="70%"> <!-- --></p>
+<p><a href="http://localhost:5500/examples/webgl/webgl.html">~Helloworld of WebGL~</a></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="using-webgl-directly">Using <strong>WebGL</strong> directly</h2>
+<ul>
+<li>Create <strong>vertex</strong> and <strong>fragment</strong> shaders</li>
+<li>Pass information from javascript</li>
+<li>Do lots of <strong>linear algebra</strong> and <strong>matrix calculations</strong></li>
+<li>Learn how to simulate lights, reflections etc.</li>
+<li>... and a lot of other difficult things</li>
+</ul>
+<p><em>~ This is what <strong>Three.js</strong> makes easy ~</em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="three-js-helloworld">Three.js: Helloworld</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/helloworld.png" alt="WebGL 101" height="450"> <!-- --></p>
+<p><a href="http://localhost:5500/examples/threejshelloworld">~Helloworld of Three.js~</a></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="three-js-helloworld">Three.js: Helloworld</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/helloworld.js.png" alt="HelloWorld" height="50%" width="70%"> <!-- --></p>
+<p>Great API docs: <a href="https://threejs.org/docs">https://threejs.org/docs</a></p>
+</section></section>
+			<section data-background-image="./images/bgs/back_3.webp" data-charset="UTF-8" data-markdown="" data-markdown-parsed="true" hidden="" aria-hidden="true" class="past" style="top: 257.5px; display: block;"><h1 id="webxr-webvr-">WebXR: <strong>WebVR</strong></h1>
+</section>						
+			<section data-background-image="./images/bgs/mushroom.png" data-background-position="bottom left" data-background-size="250px" data-charset="UTF-8" class="stack past" style="top: 0px; display: block;" data-previous-indexv="0" hidden="" aria-hidden="true"><section data-markdown="" data-markdown-parsed="true" class="" style="top: 143.5px; display: block;" aria-hidden="true"><h2 id="-vr-part-of-web-xr"><strong>VR</strong> part of Web-XR</h2>
+<ul>
+<li>Open standard that allows VR in browsers</li>
+<li>Together with AR part of the WebXR standard</li>
+<li>Spec: <a href="https://github.com/immersive-web/webxr">https://github.com/immersive-web/webxr</a></li>
+<li>More info: <a href="https://webvr.info/">https://webvr.info/</a></li>
+</ul>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" hidden="" style="top: 71px; display: block;"><h2 id="-api-support"><strong>API</strong> Support</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/webvrsupport.png" alt="WebGL 101" height="50%" width="70%"> <!-- --></p>
+<p><em>Great on <strong>desktop</strong>, and on <strong>android</strong>...</em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" hidden="" style="top: 68px; display: none;"><h2 id="what-does-it-provide-">What does it <strong>provide</strong></h2>
+<ul>
+<li>Detects any available VR devices<ul>
+<li><strong>Displays</strong> and <strong>controllers</strong></li>
+</ul>
+</li>
+<li>Returns information about capabilities</li>
+<li>Handle framerates</li>
+<li>Poll devices on <strong>position</strong> and <strong>orientation</strong></li>
+</ul>
+<p><em>Works with <strong>Vive</strong>, <strong>Oculus Rift</strong>, but also with <strong>Google Cardboard</strong></em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" hidden="" style="top: 350px; display: none;"><h2 id="how-do-you-use-it">How do you <strong>use</strong> it</h2>
+<p>(from Wikipedia)</p>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/vr2.png" alt="WebGL 101" height="50%" width="70%"> <!-- --></p>
+<p><em>.. sounds like lots of work</em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" hidden="" style="top: 350px; display: none;"><h2 id="so-let-s-add-vr-using-three-js">So let's add <strong>VR!</strong> using Three.js</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/vr1.png" alt="WebGL 101" height="50%" width="70%"> <!-- --></p>
+<p><a href="http://localhost:5500/examples/webvr">~VR-Less example~</a></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" hidden="" style="top: 350px; display: none;"><h2 id="and-convert-it-to-this-">And convert it to <strong>this</strong></h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/vr-phone.jpeg" alt="WebGL 101" height="50%" width="70%"> <!-- --></p>
+<p><em>This shows <strong>Cardboard</strong>, but works same with other <strong>devices</strong></em></p>
+<p><a href="http://localhost:5500/examples/webvr">~VR-example~</a></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" hidden="" style="top: 350px; display: none;"><h2 id="easy-to-add-vr-with-three-js-">Easy to add <strong>VR</strong> with <strong>Three.js</strong></h2>
+<pre><code class="hljs javascript"><span class="hljs-comment">// in the HTML</span>
+&lt;script src=<span class="hljs-string">"../libs/three/WebVR.js"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+
+...
+
+<span class="hljs-comment">// The only Three.js specific item</span>
+renderer.vr.enabled = <span class="hljs-literal">true</span>;
+
+<span class="hljs-comment">// add a button to switch to VR</span>
+<span class="hljs-built_in">document</span>.body.appendChild( WEBVR.createButton( renderer ) );
+</code></pre></section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" hidden="" style="top: 350px; display: none;"><h2 id="-three-js-rollercoaster"><strong>Three.js</strong>: Rollercoaster</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/rollercoaster.png" alt="WebGL 101" height="50%" width="70%"> <!-- --></p>
+<p><a href="https://threejs.org/examples/webvr_rollercoaster.html">~RollerCoaster~</a></p>
+</section></section>			
+			<section data-background-image="./images/bgs/back_3.webp" data-charset="UTF-8" data-markdown="" data-markdown-parsed="true" class="present" style="top: 283px; display: block;"><p> #ddd</p>
+</section>			
+			<section data-charset="UTF-8" hidden="" aria-hidden="true" class="stack future" style="top: 0px; display: block;"><section data-markdown="" data-markdown-parsed="true" style="top: 257.5px; display: block;"><h1 id="external-models">External models</h1>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 0px; display: block;"><h2 id="easy-to-use-external-models">Easy to use <strong>external</strong> models</h2>
+<ol>
+<li>Use blender to check / fix models.</li>
+<li>Export in three.js supported format</li>
+<li>Load in show in Three.js</li>
+</ol>
+<pre><code class="hljs javascript">  loadModel().then(<span class="hljs-function"><span class="hljs-params">model</span> =&gt;</span> {
+    ...
+  });
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadModel</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> loader = <span class="hljs-keyword">new</span> THREE.OBJLoader();
+    <span class="hljs-keyword">var</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve</span>) </span>{
+        loader.load(<span class="hljs-string">'../assets/fox/fox.obj'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">obj</span>) </span>{
+          resolve(obj);
+        });
+    });
+
+    <span class="hljs-keyword">return</span> p;
+  }
+</code></pre></section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="workflow-1-">Workflow <strong>1</strong></h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/sw-blend.png" alt="WebGL 101" height="450"> <!-- --></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="workflow-2-">Workflow <strong>2</strong></h2>
+<ul>
+<li>Try and limit number of vertices</li>
+<li>Scale down textures</li>
+<li>Bake additional textures:<ul>
+<li>lightmap</li>
+<li>ambient occlusion map</li>
+<li>normal maps</li>
+</ul>
+</li>
+</ul>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="workflow-3-">Workflow <strong>3</strong></h2>
+<pre><code class="hljs maxima"> <span class="hljs-built_in">var</span> loader = <span class="hljs-built_in">new</span> THREE.OBJLoader();
+            loader.<span class="hljs-built_in">load</span>(<span class="hljs-string">"../resources/R2D2_Standing.obj"</span>, 
+                 function(model) {
+  ...
+  // <span class="hljs-number">1</span>. <span class="hljs-built_in">scale</span> <span class="hljs-keyword">and</span> <span class="hljs-built_in">position</span>
+  // <span class="hljs-number">2</span>. possibly <span class="hljs-built_in">fix</span> <span class="hljs-built_in">some</span> material <span class="hljs-built_in">properties</span>
+  ...
+  <span class="hljs-built_in">scene</span>.add(model);
+ }
+</code></pre><p><a href="http://localhost:5500/examples/sw/html">~starwars in Three.js~</a></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="-porsche-example"><strong>Porsche</strong> example</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/porsche.png" alt="WebGL 101" height="450"> <!-- --></p>
+<p><a href="http://www.porsche.tw/microsite/911/pap.aspx#showroom/911-carrera-4s/2/4/0/0/0">Porsche - WebGL</a></p>
+<p>(show: lightshape, normalmaps, shadowmaps and diffuse maps)</p>
+<h2 id="some-other-examples">Some other examples</h2>
+<ul>
+<li><a href="http://www.acsl.co.jp/special.php">http://www.acsl.co.jp/special.php</a></li>
+<li><a href="http://hands.wtf/">http://hands.wtf/</a></li>
+</ul>
+</section></section>
+			<section data-charset="UTF-8" hidden="" aria-hidden="true" class="stack future" style="top: 0px; display: block;"><section data-markdown="" data-markdown-parsed="true" style="top: 257.5px; display: block;"><h1 id="-animations-"><strong>Animations</strong></h1>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="two-different-kinds-morph-">Two different kinds: <strong>Morph</strong></h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/morph.jpg" alt="WebGL 101" height="450"> <!-- --></p>
+<p><a href="http://localhost:5500/">~Morph Example~</a></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="two-different-kinds-rigged-">Two different kinds: <strong>Rigged</strong></h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/rigged.jpg" alt="WebGL 101" height="450"> <!-- --></p>
+<p><a href="http://localhost:5500/">~Skeleton Example~</a></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="when-to-use-which-">When to use <strong>which</strong>?</h2>
+<ul>
+<li><p><strong>Rigged</strong>: Most used for <strong>bigger</strong> animations:</p>
+<ul>
+<li>Walking, dancing, complex animations</li>
+<li>Combine with motion capture</li>
+</ul>
+</li>
+<li><p><strong>Morph</strong>:  Small, detailled animations</p>
+<ul>
+<li>Smiling, facial expressions</li>
+</ul>
+</li>
+</ul>
+<p><em>~Can be used <strong>together</strong>, at the <strong>same time</strong>~</em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="how-to-use-with-three-js-">How to use with <strong>Three.js</strong></h2>
+<ol>
+<li>Usually <strong>animate</strong> in 3rd party tool.</li>
+<li><strong>Load</strong> the model and animations.</li>
+<li>Create a <code>THREE.AnimationMixer</code> as container</li>
+<li>Get the <code>THREE.AnimaionClip</code> from the model</li>
+<li>Create a <code>THREE.ClipAction</code>s to control clips</li>
+</ol>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="and-now-with-code-">And now with <strong>code</strong></h2>
+<pre><code class="hljs haxe"> <span class="hljs-keyword">var</span> loader = <span class="hljs-keyword">new</span> <span class="hljs-type">THREE</span>.JSONLoader();
+  loader.load(<span class="hljs-string">'../../assets/models/hand/hand-8.json'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> </span>(result) {
+
+    <span class="hljs-keyword">var</span> mesh = <span class="hljs-keyword">new</span> <span class="hljs-type">THREE</span>.SkinnedMesh(result, <span class="hljs-keyword">new</span> <span class="hljs-type">THREE</span>.MeshNormalMaterial({skinning: <span class="hljs-type">true</span>}));
+    scene.add(mesh);
+
+    <span class="hljs-comment">// setup the mixer</span>
+    <span class="hljs-keyword">var</span> mixer = <span class="hljs-keyword">new</span> <span class="hljs-type">THREE</span>.AnimationMixer( mesh );
+
+    <span class="hljs-comment">// get the loaded animation</span>
+    <span class="hljs-keyword">var</span> animationClip = mesh.geometry.animations[<span class="hljs-number">0</span>];
+
+    <span class="hljs-comment">// create a clipAction from the animation</span>
+    mixer.clipAction( animationClip ).play();    
+  });
+</code></pre></section></section>	
+			<section data-state="alert" hidden="" aria-hidden="true" class="future" style="top: 350px; display: none;">ERROR: The attempt to fetch webar.md failed with HTTP status 404.Check your browser's JavaScript console for more details.<p>Remember that you need to serve the presentation HTML from a HTTP server.</p></section>
+			<section data-charset="UTF-8" hidden="" aria-hidden="true" class="stack future" style="top: 350px; display: none;"><section data-markdown="" data-markdown-parsed="true" style="top: 350px; display: none;"><h1 id="-materials-and-textures-"><strong>Materials</strong> and <strong>textures</strong></h1>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="available-materials">Available materials</h2>
+<ul>
+<li><code>MeshNormalMaterial</code>:  <ul>
+<li>Uses <strong>normal</strong> vector to color faces</li>
+<li>Great for debugging</li>
+</ul>
+</li>
+<li><code>MeshStandardMaterial</code>: <ul>
+<li>Uses physically based rendering (PBR)</li>
+<li>Same approach as in <strong>Unity</strong> or <strong>Unreal</strong> Engine</li>
+<li><a href="https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf">s2012_pbs_disney_brdf_notes_v2.pdf</a></li>
+</ul>
+</li>
+<li>And some others...</li>
+</ul>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="easy-to-use-">Easy to <strong>use</strong>...</h2>
+<pre><code class="hljs nimrod"><span class="hljs-keyword">var</span> basicMaterial = new <span class="hljs-type">THREE</span>.<span class="hljs-type">MeshStandardMaterial</span>(<span class="hljs-meta">{...}</span>);
+<span class="hljs-keyword">var</span> geom = new <span class="hljs-type">THREE</span>.<span class="hljs-type">MeshSphereGeometry</span>(<span class="hljs-number">3</span>, <span class="hljs-number">30</span>, <span class="hljs-number">30</span>);
+<span class="hljs-keyword">var</span> mesh1 = new <span class="hljs-type">THREE</span>.<span class="hljs-type">Mesh</span>(geom, basicMaterial);
+
+<span class="hljs-keyword">var</span> normalMaterial = new <span class="hljs-type">THREE</span>.<span class="hljs-type">MeshNormalMaterial</span>();
+<span class="hljs-keyword">var</span> mesh2 = new <span class="hljs-type">THREE</span>.<span class="hljs-type">Mesh</span>(geom, normalMaterial);
+</code></pre><p><em>~Three.js converts this to shaders~</em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="what-does-it-look-like">What does it look like</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/gopher.png" alt="WebGL 101" height="400"> <!-- --></p>
+<p><em><a href="http://localhost:5500/examples/meshstandard">~Standard Material Properties~</a></em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="three-js-and-textures-">Three.js and <strong>Textures</strong></h2>
+<ul>
+<li>Defined as <code>map</code>-property on a material</li>
+<li>(Usually) square images (<code>.png</code>, <code>.tga</code>, etc.)</li>
+<li>Used to add details to surface:<ul>
+<li><code>alphaMap</code>, <code>aoMap</code>, <code>bumpMap</code>, <code>displacementMap</code>, <code>emissiveMap</code>, <code>envMap</code>, <code>lightMap</code>, <code>map</code>, <code>metalnessMap</code>, <code>normalMap</code>, <code>roughnessMap</code> </li>
+</ul>
+</li>
+</ul>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="-texture-types"><strong>Texture</strong> types</h2>
+<p>Interesting ones:</p>
+<ul>
+<li>(color)<code>map</code>: Apply an image to (part of) the model</li>
+<li><code>normalMap</code>: Add fake depth to a surface</li>
+<li><code>alphaMap</code>: Set selective opacity</li>
+<li><code>emissiveMap</code>: Make parts of the model glow</li>
+</ul>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="-color-map"><strong>Color</strong> map</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/texture.png" alt="Normal map" height="400"> <!-- --></p>
+<p><em><a href="http://localhost:5500/examples/core-concepts/concepts.html">~Color Map Example~</a></em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="-normal-map"><strong>Normal</strong> map</h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/Engraved_Metal_003_NORM.jpg" alt="Normal map" height="400"> <!-- --></p>
+<p><em><a href="http://localhost:5500/examples/normalmap">~Normal Map Example~</a></em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="configuring-materials-">Configuring <strong>materials</strong></h2>
+<pre><code class="hljs haxe"><span class="hljs-keyword">var</span> textureLoader = <span class="hljs-keyword">new</span> <span class="hljs-type">THREE</span>.TextureLoader();
+
+<span class="hljs-keyword">var</span> basicMaterial = <span class="hljs-keyword">new</span> <span class="hljs-type">THREE</span>.MeshStandardMaterial();
+basicMaterial.map = textureLoader.load(<span class="hljs-string">'textures/wood.png'</span>);
+basicMaterial.normalMap = textureLoader
+    .load(<span class="hljs-string">'textures/woodNormal.png'</span>);
+
+<span class="hljs-keyword">var</span> geom = <span class="hljs-keyword">new</span> <span class="hljs-type">THREE</span>.MeshSphereGeometry(<span class="hljs-number">3</span>, <span class="hljs-number">30</span>, <span class="hljs-number">30</span>);
+<span class="hljs-keyword">var</span> mesh1 = <span class="hljs-keyword">new</span> <span class="hljs-type">THREE</span>.Mesh(geom, basicMaterial);
+</code></pre><p><em>~ asynchronously loads the materials ~</em></p>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="-reflections-in-three-js"><strong>Reflections</strong> in THREE.js</h2>
+<ul>
+<li>Reflections are expensive</li>
+<li>Often faked through an <strong>environment map</strong></li>
+</ul>
+<blockquote>
+<p>In computer graphics, environment mapping, or reflection mapping, is an 
+efficient image-based lighting technique for approximating the 
+appearance of a reflective surface by means of a <strong>precomputed texture image</strong>. 
+The <strong>texture</strong> is used to store the image of the <strong>distant environment</strong> surrounding 
+the rendered object.</p>
+</blockquote>
+</section><section data-markdown="" data-markdown-parsed="true" class="future" aria-hidden="true" style="top: 350px; display: none;"><h2 id="an-example-environment-map-">An example <strong>environment map</strong></h2>
+<p><img src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/Env.jpg" alt="Normal map" height="400"> <!-- --></p>
+<p>~ <em>a 360º image</em> ~</p>
+</section></section>					
+	</div>
+
+	<script src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/head.min.js"></script>
+	<script src="./Three.js, Easy 3D in your browser for when two dimensions just aren&#39;t enough!_files/reveal.js"></script>
+
+	<script>
+		// More info about config & dependencies:
+		// - https://github.com/hakimel/reveal.js#configuration
+		// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			fragmentInURL: true,
+			history: true,
+			dependencies: [{
+					src: '../reveal.js/plugin/markdown/marked.js'
+				},
+				{
+					src: '../reveal.js/plugin/markdown/markdown.js'
+				},
+				{
+					src: '../reveal.js/plugin/notes/notes.js',
+					async: true
+				},
+				{
+					src: '../reveal.js/plugin/highlight/highlight.js',
+					async: true,
+					callback: function () {
+						hljs.initHighlightingOnLoad();
+					}
+				}
+			]
+		});
+	</script>
+<!-- Code injected by live-server -->
+<script type="text/javascript">
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					head.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					head.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+
+<div class="backgrounds"><div class="slide-background past" data-background-hash="0./images/bgs/back_1.jpgnullnullnullnullnullnullnull" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background stack past" data-background-hash="null250px./images/bgs/flamingo.pngnullnullnullnullbottom leftnullnull" data-background-size="250px" style="display: none;"><div class="slide-background-content" style="background-size: 250px; background-position: left bottom;"></div><div class="slide-background present" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div></div><div class="slide-background past" data-background-hash="0./images/bgs/back_2.webpnullnullnullnullnullnullnull" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background stack past" data-background-hash="null300px./images/bgs/pig.pngnullnullnullnullbottom leftnullnull" data-background-size="300px" data-loaded="true" style="display: none;"><div class="slide-background-content" style="background-size: 300px; background-position: left bottom; background-image: url(&quot;./images/bgs/pig.png&quot;);"></div><div class="slide-background present" data-loaded="true" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div></div><div class="slide-background past" data-background-hash="0./images/bgs/back_3.webpnullnullnullnullnullnullnull" data-loaded="true" style="display: block;"><div class="slide-background-content" style="background-image: url(&quot;./images/bgs/back_3.webp&quot;);"></div></div><div class="slide-background stack past" data-background-hash="null250px./images/bgs/mushroom.pngnullnullnullnullbottom leftnullnull" data-background-size="250px" data-loaded="true" style="display: block;"><div class="slide-background-content" style="background-size: 250px; background-position: left bottom; background-image: url(&quot;./images/bgs/mushroom.png&quot;);"></div><div class="slide-background present" data-loaded="true" style="display: block;"><div class="slide-background-content"></div></div><div class="slide-background future" data-loaded="true" style="display: block;"><div class="slide-background-content"></div></div><div class="slide-background future" data-loaded="true" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div></div><div class="slide-background present" data-background-hash="0./images/bgs/back_3.webpnullnullnullnullnullnullnull" data-loaded="true" style="display: block;"><div class="slide-background-content" style="background-image: url(&quot;./images/bgs/back_3.webp&quot;);"></div></div><div class="slide-background stack future" data-loaded="true" style="display: block;"><div class="slide-background-content"></div><div class="slide-background present" data-loaded="true" style="display: block;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: block;" data-loaded="true"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div></div><div class="slide-background stack future" style="display: block;" data-loaded="true"><div class="slide-background-content"></div><div class="slide-background present" style="display: block;" data-loaded="true"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background stack future" style="display: none;"><div class="slide-background-content"></div><div class="slide-background present" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div><div class="slide-background future" style="display: none;"><div class="slide-background-content"></div></div></div></div><div class="progress" style="display: block;"><span style="width: 654.545px;"></span></div><aside class="controls" data-controls-layout="bottom-right" data-controls-back-arrows="faded" style="display: block;"><button class="navigate-left enabled" aria-label="previous slide"><div class="controls-arrow"></div></button><button class="navigate-right enabled" aria-label="next slide"><div class="controls-arrow"></div></button><button class="navigate-up" aria-label="above slide" disabled="disabled"><div class="controls-arrow"></div></button><button class="navigate-down" aria-label="below slide" disabled="disabled"><div class="controls-arrow"></div></button></aside><div class="slide-number" style="display: none;"></div><div class="speaker-notes" data-prevent-swipe="" tabindex="0"></div><div class="pause-overlay"><button class="resume-button">Resume presentation</button></div><div id="aria-status-div" aria-live="polite" aria-atomic="true" style="position: absolute; height: 1px; width: 1px; overflow: hidden; clip: rect(1px, 1px, 1px, 1px);"> #ddd
+</div></div></body></html>

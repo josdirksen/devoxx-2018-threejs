@@ -100,3 +100,17 @@ var mesh1 = new THREE.Mesh(geom, basicMaterial);
 ![Normal map](./images/Env.jpg) <!-- .element height="400" -->
 
 ~ *a 360º image* ~
+
+
+## **Porsche** example
+
+![WebGL 101](./images/porsche.png) <!-- .element height="450" -->
+
+[Porsche - WebGL](http://www.porsche.tw/microsite/911/pap.aspx#showroom/911-carrera-4s/2/4/0/0/0)
+
+(show: lightshape, normalmaps, shadowmaps and diffuse maps)
+
+## Some other examples
+ - http://www.acsl.co.jp/special.php
+ - http://hands.wtf/
+

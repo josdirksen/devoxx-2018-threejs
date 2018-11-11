@@ -6,8 +6,11 @@ function init() {
   var renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setClearColor(0xb4c8fc);
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.vr.enabled = true;
   document.getElementById("webgl-output").appendChild(renderer.domElement);
 
+  document.body.appendChild( WEBVR.createButton( renderer ) );
+  
   var scene = new THREE.Scene();
 
   // add a ground plane
@@ -56,7 +59,6 @@ function init() {
   // render a simple city
   var city  = new THREEx.ProceduralCity(renderer, 10000)
   scene.add(city);
-
 
   // kick off rendering
   renderer.setAnimationLoop(render)
