@@ -60,10 +60,9 @@ function init() {
   var clock = new THREE.Clock();
 
   // kick off rendering
-  render()
+  renderer.setAnimationLoop(render);
+
   function render() {
-    
-    requestAnimationFrame(render);
     if( arToolkitSource.ready === false )	return
     arToolkitContext.update( arToolkitSource.domElement )
     scene.visible = camera.visible
