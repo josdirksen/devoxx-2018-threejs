@@ -17,6 +17,7 @@
 
 ### VR
 - [webvr - use VRBrowser](./examples/webvr)
+- [rollerocoaster - use VRBrowser](https://threejs.org/examples/webvr_rollercoaster.html)
 
 ### AR
 - [arjs - use Safari](./examples/arjs)
