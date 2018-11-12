@@ -69,9 +69,8 @@ function init() {
     if( arToolkitSource.ready === false )	{
     } else {
       arToolkitContext.update( arToolkitSource.domElement)
+      scene.visible = camera.visible
     } 
-    
-    scene.visible = camera.visible
 
     if (mixer) mixer.update(clock.getDelta());
     renderer.render(scene, camera);
