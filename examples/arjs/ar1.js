@@ -66,8 +66,11 @@ function init() {
   renderer.setAnimationLoop(render);
 
   function render() {
-    if( arToolkitSource.ready === false )	return
-    arToolkitContext.update( arToolkitSource.domElement )
+    if( arToolkitSource.ready === false )	{
+    } else {
+      arToolkitContext.update( arToolkitSource.domElement)
+    } 
+    
     scene.visible = camera.visible
 
     if (mixer) mixer.update(clock.getDelta());
