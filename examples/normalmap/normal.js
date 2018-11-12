@@ -20,7 +20,6 @@ var envMap = new THREE.CubeTextureLoader()
   document.getElementById("webgl-output").appendChild(renderer.domElement);
 
   var scene = new THREE.Scene();
-  scene.background = envMap;
 
   // define the camera
   var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200);

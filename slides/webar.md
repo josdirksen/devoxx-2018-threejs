@@ -107,7 +107,6 @@ doRender() {
 
 ## Final Note on **Web-AR**
 
-- Support is very limited
 - **XRViewer**: Almost compatible with *Web-XR*
 - **WebAROnARKit** and **WebAROnARCore**: 
   - iOS: Build using XCode

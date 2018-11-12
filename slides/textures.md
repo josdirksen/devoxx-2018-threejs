@@ -1,7 +1,4 @@
-# **Materials** and **textures**
-
-
-## Available materials
+## Available **materials**
 
 - `MeshNormalMaterial`:  
   - Uses **normal** vector to color faces
@@ -59,6 +56,13 @@ Interesting ones:
 *[~Color Map Example~](../examples/core-concepts/concepts.html)*
 
 
+## **UV** mapping
+
+![Normal map](images/fox_blend.png) <!-- .element height="400" -->
+
+*~Map each **face** to part of the **texture**~*
+
+
 ## **Normal** map
 
 ![Normal map](./images/Engraved_Metal_003_NORM.jpg) <!-- .element height="400" -->
@@ -66,7 +70,7 @@ Interesting ones:
 *[~Normal Map Example~](../examples/normalmap)*
 
 
-## Configuring **materials**
+## Loading **textures**
 
 ```
 var textureLoader = new THREE.TextureLoader();
@@ -83,34 +87,8 @@ var mesh1 = new THREE.Mesh(geom, basicMaterial);
 *~ asynchronously loads the materials ~*
 
 
-## **Reflections** in THREE.js
-
-- Reflections are expensive
-- Often faked through an **environment map**
-
-> In computer graphics, environment mapping, or reflection mapping, is an 
-> efficient image-based lighting technique for approximating the 
-> appearance of a reflective surface by means of a **precomputed texture image**. 
-> The **texture** is used to store the image of the **distant environment** surrounding 
-> the rendered object.
-
-
-## An example **environment map**
-
-![Normal map](./images/Env.jpg) <!-- .element height="400" -->
-
-~ *a 360º image* ~
-
-
 ## **Porsche** example
 
 ![WebGL 101](./images/porsche.png) <!-- .element height="450" -->
 
 [Porsche - WebGL](http://www.porsche.tw/microsite/911/pap.aspx#showroom/911-carrera-4s/2/4/0/0/0)
-
-(show: lightshape, normalmaps, shadowmaps and diffuse maps)
-
-## Some other examples
- - http://www.acsl.co.jp/special.php
- - http://hands.wtf/
-
