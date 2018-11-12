@@ -23,7 +23,10 @@ function init() {
   })
 	var arToolkitContext = new THREEx.ArToolkitContext({
 		cameraParametersUrl: './camera_para.dat',
-		detectionMode: 'mono',
+    detectionMode: 'mono',
+    maxDetectionRate: 30,
+		canvasWidth: 80*3,
+		canvasHeight: 60*3
 	})
 	arToolkitContext.init(function onCompleted(){
 		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
