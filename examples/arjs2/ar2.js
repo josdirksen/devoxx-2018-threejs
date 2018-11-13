@@ -72,7 +72,28 @@ function init() {
     mixer.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
   });
 
-  scene2.add(new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1), new THREE.MeshNormalMaterial()));
+  var mixer2;
+  var loader2 = new THREE.FBXLoader();
+  
+  loader2.load( 'hulk7.fbx', function ( mesh ) {
+
+    mesh.translateZ(0.5);
+
+    // somehow the mesh is invisble fix this
+    mesh.children[0].material.transparent = false;
+    mesh.children[0].material.opacity = 1;
+    mesh.children[3].material.transparent = false;
+    mesh.children[3].material.opacity = 1;
+    mesh.children[8].material.transparent = false;
+    mesh.children[8].material.opacity = 1;
+    mesh.children[9].material.transparent = false;
+    mesh.children[9].material.opacity = 1;
+
+    scene2.add(mesh)
+    mixer2 = new THREE.AnimationMixer( mesh );
+    mixer2.clipAction( mesh.animations[ 0 ] ).setDuration( 2 ).play();
+  }, e=> console.log(e), f => console.log(f));
+
   var clock = new THREE.Clock();
 
   // kick off rendering
@@ -85,11 +106,11 @@ function init() {
       arToolkitContext.update( arToolkitSource.domElement)
       scene.visible = camera.visible
     } 
-
-    
     scene2.visible = camera2.visible
 
-    if (mixer) mixer.update(clock.getDelta());
+    var delta = clock.getDelta();
+    if (mixer) mixer.update(delta);
+    if (mixer2) mixer2.update(delta);
     renderer.render(scene, camera);
     renderer.render(scene2, camera2);
   }
