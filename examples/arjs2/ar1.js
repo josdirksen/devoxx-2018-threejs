@@ -5,7 +5,8 @@ function init() {
   // get a renderer and attach to html dom element
 	var renderer	= new THREE.WebGLRenderer({antialias: true, alpha: true});
 	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-	renderer.setSize( 640, 480 );
+  renderer.setSize( 640, 480 );
+  renderer.autoClear = false;
 	renderer.domElement.style.position = 'absolute'
 	renderer.domElement.style.top = '0px'
 	renderer.domElement.style.left = '0px'
@@ -71,19 +72,22 @@ function init() {
     mixer.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
   });
 
-  scene.add(new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1), new THREE.MeshNormalMaterial()));
+  scene2.add(new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1), new THREE.MeshNormalMaterial()));
   var clock = new THREE.Clock();
 
   // kick off rendering
   renderer.setAnimationLoop(render);
 
   function render() {
+    renderer.clear();
     if( arToolkitSource.ready === false )	{
     } else {
       arToolkitContext.update( arToolkitSource.domElement)
       scene.visible = camera.visible
-      scene2.visible = camera2.visible
     } 
+
+    
+    scene2.visible = camera2.visible
 
     if (mixer) mixer.update(clock.getDelta());
     renderer.render(scene, camera);
