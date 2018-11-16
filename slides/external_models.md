@@ -48,7 +48,6 @@
   loader.load( 'flamingo.gltf', function ( gltf ) {
     var mesh = gltf.scene.children[ 0 ];
     mesh.scale.set( 0.35, 0.35, 0.35);
-    mesh.position.y = 0;
     scene.add( mesh );
     mixer = new THREE.AnimationMixer( mesh );
     var action = mixer.clipAction(gltf.animations[0])
@@ -96,3 +95,4 @@
 ![Dancing Duke](./images/duke.png) <!-- .element height="450" -->
 
 [~Dancing duke~](../examples/animations)
+[~Dancing hulk~](../examples/animations.hulk)
